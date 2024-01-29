@@ -1,0 +1,24 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'clean_drug_targets_moa_pathway_indications' is a PySpark DataFrame
+# If it's not a DataFrame, you can convert it using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data = [
+    ("A", "actionType1", "target1", "topTerm1", "indication1"),
+    ("B", "actionType2", "target2", "topTerm2", "indication2"),
+    ("C", "actionType3", "target3", "topTerm3", "indication3"),
+]
+columns = ["chemblIds", "actionType", "targets", "topLevelTerm", "approvedIndications"]
+clean_drug_targets_moa_pathway_indications = spark.createDataFrame(data, columns)
+
+# Rename the 'topLevelTerm' column to 'pathwayCategory'
+clean_drug_targets_moa_pathway_indications = clean_drug_targets_moa_pathway_indications \
+    .withColumnRenamed("topLevelTerm", "pathwayCategory")
+
+# Show the resulting DataFrame
+clean_drug_targets_moa_pathway_indications.show()

@@ -1,0 +1,49 @@
+from pyspark.sql import SparkSession
+from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
+from pyspark.ml import Pipeline
+from pyspark.sql.functions import col
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'train' is a PySpark DataFrame
+# If it's not a DataFrame, you can convert it using: spark.createDataFrame(pandas_df)
+
+# Assuming 'chemblIds', 'targets', and 'value1' are the correct categorical column names
+categorical_columns = ['chemblIds', 'targets', 'value1']
+
+# Create a StringIndexer for each categorical column
+indexers = [StringIndexer(inputCol=column, outputCol=f"{column}_index") for column in categorical_columns]
+
+# Create a OneHotEncoder for each indexed column
+encoders = [OneHotEncoder(inputCol=f"{column}_index", outputCol=f"{column}_encoded") for column in categorical_columns]
+
+# Assemble all feature columns into a single vector column
+assembler_inputs = [f"{column}_encoded" for column in categorical_columns]
+assembler = VectorAssembler(inputCols=assembler_inputs, outputCol="features")
+
+# Create a Pipeline to execute the transformations
+pipeline = Pipeline(stages=indexers + encoders + [assembler])
+
+# Fit the pipeline on the training data
+pipeline_model = pipeline.fit(train)
+
+# Transform the training data
+one_hot_encoded = pipeline_model.transform(train)
+
+# Show the resulting DataFrame
+one_hot_encoded.select("drug_target", "features").show(truncate=False)
+
+
+
+
+from pyspark.sql.functions import concat_ws
+
+# Assuming 'one_hot_encoded' is your DataFrame
+one_hot_encoded = one_hot_encoded.withColumn(
+    "drug_target", concat_ws("-", col("chemblIds"), col("targets"), col("value1"))
+)
+
+# Select 'drug_target' and 'features'
+one_hot_encoded.select("drug_target", "features").show(truncate=False)
+

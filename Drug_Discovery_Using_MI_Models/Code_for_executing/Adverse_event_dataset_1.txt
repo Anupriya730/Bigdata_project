@@ -1,0 +1,21 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import collect_list
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'target_ae_full_df' is a PySpark DataFrame
+# If it's not a DataFrame, you can convert it using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data = [("A", "event1"), ("B", "event2"), ("A", "event3"), ("C", "event4")]
+columns = ["targetId", "event"]
+target_ae_full_df = spark.createDataFrame(data, columns)
+
+# Group by 'targetId' and aggregate 'event' into a list
+target_ae_grouped = target_ae_full_df \
+    .groupBy("targetId") \
+    .agg(collect_list("event").alias("adverse_events"))
+
+# Show the resulting DataFrame
+target_ae_grouped.show()

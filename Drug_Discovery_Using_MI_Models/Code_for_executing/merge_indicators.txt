@@ -1,0 +1,24 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import explode
+from pyspark.sql.functions import col
+
+# Assuming spark is your SparkSession
+# indications_full_df is your DataFrame
+
+# Drop rows where 'id' is null
+indications_full_df = indications_full_df.filter(col("id").isNotNull())
+
+# Explode the 'approvedIndications' array column
+exploded_indications = indications_full_df.select("id", explode("approvedIndications").alias("approvedIndications"))
+
+# Drop unnecessary columns
+exploded_indications = exploded_indications.drop("indications", "indicationCount")
+
+# Drop rows where 'approvedIndications' is null
+exploded_indications = exploded_indications.filter(col("approvedIndications").isNotNull())
+
+# Drop duplicates based on 'id' and 'approvedIndications' columns
+exploded_indications = exploded_indications.dropDuplicates(subset=["id", "approvedIndications"])
+
+# Show the resulting DataFrame
+exploded_indications.show()

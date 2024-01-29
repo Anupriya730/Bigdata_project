@@ -1,0 +1,31 @@
+from pyspark.sql.functions import explode, col, trim
+from pyspark.sql import SparkSession
+
+# Assuming `moa_full_df` is already defined as a PySpark DataFrame
+
+# Create a SparkSession
+spark = SparkSession.builder.appName("MyApp").getOrCreate()
+
+# Explode the 'chemblIds' array column
+exploded_moa = moa_full_df.withColumn("chemblId", explode(col("chemblIds")))
+
+# Select and explode columns, then trim leading and trailing whitespaces
+select_moa_full_df = exploded_moa.select(
+    "chemblId",
+    "actionType",
+    "mechanismOfAction",
+    "targetName",
+    "targetType",
+    explode("targets").alias("target")
+)
+
+exploded_moa = select_moa_full_df.withColumn("chemblId", trim(col("chemblId")))
+exploded_moa = exploded_moa.withColumn("actionType", trim(col("actionType")))
+exploded_moa = exploded_moa.withColumn("mechanismOfAction", trim(col("mechanismOfAction")))
+exploded_moa = exploded_moa.withColumn("targetName", trim(col("targetName")))
+exploded_moa = exploded_moa.withColumn("targetType", trim(col("targetType")))
+exploded_moa = exploded_moa.withColumn("target", trim(col("target")))
+
+# Show the schema of the transformed DataFrame
+exploded_moa.printSchema()
+

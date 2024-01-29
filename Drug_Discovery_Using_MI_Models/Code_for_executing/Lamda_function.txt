@@ -1,0 +1,11 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+from pyspark.sql.functions import expr
+
+# Apply the transformations to the DataFrame columns
+pathways = pathways.withColumn("pathwayId", expr("trim(split(pathwayId, ':')[size(split(pathwayId, ':')) - 1])")) \
+                   .withColumn("pathway", expr("trim(split(pathway, ':')[size(split(pathway, ':')) - 1])")) \
+                   .withColumn("topLevelTerm", expr("trim(split(topLevelTerm, ':')[size(split(topLevelTerm, ':')) - 1])"))
+
+# Show the transformed DataFrame
+pathways.show()
