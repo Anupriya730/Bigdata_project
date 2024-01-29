@@ -1,0 +1,14 @@
+from pyspark.sql.functions import split
+
+# Split the 'pathway' column by comma and create new columns
+pathways_split = exploded_target_pathway.withColumn("pathwayArray", split(col("pathway"), ","))
+
+# Select the desired columns and drop unnecessary columns
+pathways_split = pathways_split.select(
+    col("pathwayArray")[0].alias("pathwayId"),
+    col("pathwayArray")[1].alias("pathway"),
+    col("pathwayArray")[2].alias("topLevelTerm")
+)
+
+# Show the schema of the transformed DataFrame
+pathways_split.printSchema()

@@ -1,0 +1,24 @@
+import threading
+from pyspark.sql import SparkSession
+
+# Create a Spark session
+spark = SparkSession.builder.master("local").appName("MyApp").getOrCreate()
+
+# Your PySpark code here
+
+# Function to run in a separate thread
+def my_function():
+    print("Thread is running!")
+
+# Create a thread and start it
+my_thread = threading.Thread(target=my_function)
+my_thread.start()
+
+# Continue with the rest of your PySpark code
+# ...
+
+# Wait for the thread to finish
+my_thread.join()
+
+# Stop the Spark session
+spark.stop()

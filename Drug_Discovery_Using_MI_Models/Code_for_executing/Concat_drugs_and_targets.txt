@@ -1,0 +1,101 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'known_targets_with_ae' and 'known_drugs_with_ae' are PySpark DataFrames
+# If they are not DataFrames, you can convert them using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data1 = [("A", "target1", "chembl1"), ("B", "target2", "chembl2"), ("C", "target3", "chembl3")]
+columns1 = ["chemblIds", "targets", "value1"]
+known_targets_with_ae = spark.createDataFrame(data1, columns1)
+
+data2 = [("D", "target4", "chembl4"), ("E", "target5", "chembl5"), ("F", "target6", "chembl6")]
+columns2 = ["chemblIds", "targets", "value2"]
+known_drugs_with_ae = spark.createDataFrame(data2, columns2)
+
+# Concatenate DataFrames vertically
+known_drug_target_ae = known_targets_with_ae.union(known_drugs_with_ae)
+
+# Drop duplicates based on 'chemblIds'
+known_drug_target_ae = known_drug_target_ae.dropDuplicates(["chemblIds"])
+
+# Show the resulting DataFrame
+known_drug_target_ae.show()
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'known_drug_target_ae' is a PySpark DataFrame
+# If it's not a DataFrame, you can convert it using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data = [("A", "target1", "chembl1"), ("B", "target2", "chembl2"), ("C", "target3", "chembl3")]
+columns = ["chemblIds", "targets", "value1"]
+known_drug_target_ae = spark.createDataFrame(data, columns)
+
+# Create a new column 'drug_target' with the desired concatenation using expr
+known_drug_target_ae = known_drug_target_ae.withColumn(
+    "drug_target", expr("concat(chemblIds, '-', targets)")
+)
+
+# Show the resulting DataFrame
+known_drug_target_ae.show()
+
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'known_drug_target_ae' is a PySpark DataFrame
+# If it's not a DataFrame, you can convert it using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data = [("A", "target1", "chembl1"), ("B", "target2", "chembl2"), ("C", "target3", "chembl3")]
+columns = ["chemblIds", "targets", "value1"]
+known_drug_target_ae = spark.createDataFrame(data, columns)
+
+# Create a new column 'drug_target' with the desired concatenation using expr
+known_drug_target_ae = known_drug_target_ae.withColumn(
+    "drug_target", expr("concat(chemblIds, '-', targets)")
+)
+
+# Drop 'chemblIds' and 'targets' columns
+known_drug_target_ae = known_drug_target_ae.drop("chemblIds").drop("targets")
+
+# Show the resulting DataFrame
+known_drug_target_ae.show()
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'known_drug_target_ae' is a PySpark DataFrame
+# If it's not a DataFrame, you can convert it using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data = [("A", "target1", "chembl1", "action1", "pathway1", "indication1"),
+        ("B", "target2", "chembl2", "action2", "pathway2", "indication2"),
+        ("C", "target3", "chembl3", "action3", "pathway3", "indication3")]
+columns = ["chemblIds", "targets", "value1", "actionType", "pathwayCategory", "approvedIndications"]
+known_drug_target_ae = spark.createDataFrame(data, columns)
+
+# Create a new column 'drug_target' with the desired concatenation using expr
+known_drug_target_ae = known_drug_target_ae.withColumn(
+    "drug_target", expr("concat(chemblIds, '-', targets)")
+)
+
+# Select the desired columns
+known_drug_target_ae = known_drug_target_ae.select("drug_target", "actionType", "pathwayCategory", "approvedIndications")
+
+# Show the resulting DataFrame
+known_drug_target_ae.show()

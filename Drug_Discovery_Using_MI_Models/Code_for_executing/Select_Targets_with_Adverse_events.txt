@@ -1,0 +1,47 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'clean_drug_targets_moa_pathway_indications', 'target_ae_grouped', and 'drug_adverse_events_grouped' are PySpark DataFrames
+# If they are not DataFrames, you can convert them using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data1 = [("A", "target1", "chembl1"), ("B", "target2", "chembl2"), ("C", "target3", "chembl3")]
+columns1 = ["chemblIds", "targets", "value1"]
+clean_drug_targets_moa_pathway_indications = spark.createDataFrame(data1, columns1)
+
+data2 = [("target1", ["event1", "event2"]), ("target3", ["event3"]), ("target4", ["event4"])]
+columns2 = ["targetId", "adverse_events"]
+target_ae_grouped = spark.createDataFrame(data2, columns2)
+
+data3 = [("chembl1", ["event5", "event6"]), ("chembl3", ["event7"]), ("chembl4", ["event8"])]
+columns3 = ["chembl_id", "adverse_events"]
+drug_adverse_events_grouped = spark.createDataFrame(data3, columns3)
+
+# Collect values for filter conditions
+target_ids_to_filter = target_ae_grouped.select("targetId").distinct().rdd.flatMap(lambda x: x).collect()
+chembl_ids_to_filter = drug_adverse_events_grouped.select("chembl_id").distinct().rdd.flatMap(lambda x: x).collect()
+
+# Known targets with AE
+known_targets_with_ae = clean_drug_targets_moa_pathway_indications \
+    .filter(col("targets").isin(*target_ids_to_filter))
+
+# Known drugs with AE
+known_drugs_with_ae = clean_drug_targets_moa_pathway_indications \
+    .filter(col("chemblIds").isin(*chembl_ids_to_filter))
+
+# Targets without AE
+targets_without_ae = clean_drug_targets_moa_pathway_indications \
+    .filter(~col("targets").isin(*target_ids_to_filter))
+
+# Drugs without AE
+drugs_without_ae = clean_drug_targets_moa_pathway_indications \
+    .filter(~col("chemblIds").isin(*chembl_ids_to_filter))
+
+# Show the resulting DataFrames
+known_targets_with_ae.show()
+known_drugs_with_ae.show()
+targets_without_ae.show()
+drugs_without_ae.show()

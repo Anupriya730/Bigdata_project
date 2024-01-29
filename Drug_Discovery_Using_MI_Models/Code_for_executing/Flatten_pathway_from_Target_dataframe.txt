@@ -1,0 +1,18 @@
+
+
+from pyspark.sql.functions import explode, col, expr
+
+# Filter rows where 'pathways' is not null and 'id' is not null
+target_pathway = targets_full_df.filter(targets_full_df.pathways.isNotNull() & targets_full_df.id.isNotNull())
+
+# Select necessary columns
+target_pathway = target_pathway.select("id", "approvedName", "pathways.pathway")  # assuming 'pathway' is the array field inside the struct
+
+# Explode the 'pathway' array column
+exploded_target_pathway = target_pathway.withColumn("pathway", explode(col("pathway")))
+
+# Trim leading and trailing whitespaces from the 'pathway' column
+exploded_target_pathway = exploded_target_pathway.withColumn("pathway", expr("trim(pathway)"))
+
+# Show the schema of the transformed DataFrame
+exploded_target_pathway.printSchema()

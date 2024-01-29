@@ -1,0 +1,53 @@
+# Print the schema of the DataFrames to verify the column names
+exploded_moa.printSchema()
+wide_target_pathway.printSchema()
+
+from pyspark.sql.functions import col
+
+# Join DataFrames on 'target' and 'approvedName' columns
+drug_targets_moa_pathway = exploded_moa.join(
+    wide_target_pathway,
+    exploded_moa['target'] == wide_target_pathway['approvedName'],
+    'left_outer'
+).drop('id')  # Drop the 'id' column after the join
+
+# Filter rows where 'pathway' and 'target' are not null
+clean_drug_targets_moa_pathway = drug_targets_moa_pathway.filter(
+    col('pathway').isNotNull() & col('target').isNotNull()
+)
+
+
+
+from pyspark.sql.functions import col
+
+# List of columns to consider for dropping duplicates
+duplicate_columns = ['chemblIds', 'actionType', 'mechanismOfAction', 'targetName', 'targetType', 'targets', 'approvedName', 'pathwayId', 'pathway', 'topLevelTerm']
+
+# Drop duplicates based on the specified subset of columns
+clean_drug_targets_moa_pathway = clean_drug_targets_moa_pathway.dropDuplicates(subset=duplicate_columns)
+
+
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# Assuming spark is your SparkSession
+# clean_drug_targets_moa_pathway is your DataFrame
+# duplicate_columns is the list of column names
+
+# Drop duplicates based on the specified columns
+clean_drug_targets_moa_pathway = clean_drug_targets_moa_pathway.dropDuplicates(subset=[
+    "chemblId",
+    "actionType",
+    "mechanismOfAction",
+    "targetName",
+    "targetType",
+    "target",
+    "approvedName",
+    "pathwayId",
+    "pathway",
+    "topLevelTerm"
+])
+
+# Show the resulting DataFrame
+clean_drug_targets_moa_pathway.show()

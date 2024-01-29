@@ -1,0 +1,21 @@
+
+from pyspark.sql.functions import monotonically_increasing_id, trim
+
+# Add unique IDs to both DataFrames
+exploded_target_pathway = exploded_target_pathway.withColumn("unique_id", monotonically_increasing_id())
+pathways = pathways.withColumn("unique_id", monotonically_increasing_id())
+
+# Perform inner join on the unique IDs
+wide_target_pathway = exploded_target_pathway.join(pathways, on="unique_id", how="inner")
+
+# Drop the 'pathways' column and the 'unique_id' column if not needed
+wide_target_pathway = wide_target_pathway.drop("pathways").drop("unique_id")
+
+# Apply trim operation to all columns
+for col_name in wide_target_pathway.columns:
+    wide_target_pathway = wide_target_pathway.withColumn(col_name, trim(col(col_name)))
+
+# Show the transformed DataFrame
+wide_target_pathway.show()
+
+

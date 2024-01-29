@@ -1,0 +1,25 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# Assuming you already have a SparkSession named 'spark'
+# If not, create one using: spark = SparkSession.builder.appName("YourAppName").getOrCreate()
+
+# Assuming 'clean_drug_targets_moa_pathway' and 'exploded_indications' are PySpark DataFrames
+# If they are not DataFrames, you can convert them using: spark.createDataFrame(pandas_df)
+
+# Example data creation, replace this with your actual data loading logic
+data1 = [("A", 1), ("B", 2), ("C", 3)]
+columns1 = ["chemblIds", "value1"]
+clean_drug_targets_moa_pathway = spark.createDataFrame(data1, columns1)
+
+data2 = [("A", ["indication1", "indication2"]), ("B", ["indication3"]), ("D", ["indication4"])]
+columns2 = ["id", "indications"]
+exploded_indications = spark.createDataFrame(data2, columns2)
+
+# Perform the join operation
+drug_targets_moa_pathway_indications = clean_drug_targets_moa_pathway \
+    .join(exploded_indications, col("chemblIds") == col("id"), "left_outer") \
+    .drop("id")
+
+# Show the resulting DataFrame
+drug_targets_moa_pathway_indications.show()
